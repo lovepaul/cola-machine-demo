@@ -7,17 +7,20 @@ import com.alibaba.cola.statemachine.builder.StateMachineBuilderFactory;
 import com.yjc.eventbus.events.OperaOrderEvent;
 import com.yjc.eventbus.interfaces.OrderConditionImpl;
 import com.yjc.eventbus.status.OrderStatus;
+import lombok.Data;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.HashMap;
 import java.util.Map;
 
+@Data
 @Component
-public class HelloMachine {
+public class OrderMachine {
 
-    public StateMachine test1() {
+    public static  StateMachine orderStateMachine;
 
+    @PostConstruct
+    public void setOrderStateMachine() {
         StateMachineBuilder<OrderStatus, OperaOrderEvent, Map> builder = StateMachineBuilderFactory.create();
         builder.internalTransition()
                 .within(OrderStatus.NORMAL)
@@ -54,10 +57,16 @@ public class HelloMachine {
                 .on(OperaOrderEvent.USER_CLOSE)
                 .when(new OrderConditionImpl())
                 .perform(action1());
-
-
         StateMachine<OrderStatus, OperaOrderEvent, Map> stateMachine = builder.build("333" + "2");
-        return stateMachine;
+        orderStateMachine = stateMachine;
+    }
+
+    public static StateMachine getOrderStateMachine() {
+        return orderStateMachine;
+    }
+
+    public static void setOrderStateMachine(StateMachine orderStateMachine) {
+        OrderMachine.orderStateMachine = orderStateMachine;
     }
 
     public Action<OrderStatus, OperaOrderEvent, Map> action1() {
